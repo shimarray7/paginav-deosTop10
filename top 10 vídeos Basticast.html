@@ -68,7 +68,8 @@ body {
 }
 
 .video-item {
-  display: flex; align-items: center;
+  display: flex; flex-direction: column; /* Alterado para coluna */
+  align-items: center;
   background: var(--card);
   padding: 8px; border-radius: var(--radius);
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -79,7 +80,7 @@ body {
 .video-item img {
   width: 120px;
   border-radius: var(--radius);
-  margin-right: 10px;
+  margin-bottom: 10px; /* Margem inferior para espaçamento */
 }
 
 .label-block {
@@ -101,19 +102,24 @@ body {
 
 .edit-block {
   display: flex;
-  align-items: center;
+  flex-direction: column; /* Alterado para coluna */
+  align-items: stretch; /* Para ocupar toda a largura */
   flex: 1;
 }
 
 .edit-input {
-  flex: 1;
   padding: 4px 6px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  margin-bottom: 4px; /* Margem inferior para espaçamento */
+}
+
+.edit-buttons {
+  display: flex;
+  justify-content: space-between; /* Para espaçar os botões */
 }
 
 .edit-buttons button {
-  margin-left: 4px;
   padding: 4px 8px;
   border: none;
   border-radius: var(--radius);
@@ -187,6 +193,7 @@ hr {
       const [url, setUrl]     = React.useState("");
       const [editingIndex, setEditingIndex] = React.useState(null);
       const [editingName, setEditingName]   = React.useState("");
+      const [editingUrl, setEditingUrl]     = React.useState(""); // Novo estado para URL
       const dragItem       = React.useRef();
       const dragOverItem   = React.useRef();
 
@@ -224,20 +231,26 @@ hr {
         dragOverItem.current = null;
       }
 
-      function startEdit(i, currentName) {
+      function startEdit(i, currentName, currentUrl) {
         setEditingIndex(i);
         setEditingName(currentName);
+        setEditingUrl(currentUrl); // Preencher o URL para edição
       }
+      
       function saveEdit() {
         const updated = [...videos];
         updated[editingIndex].name = editingName.trim() || updated[editingIndex].name;
+        updated[editingIndex].id = getYouTubeID(editingUrl.trim()) || updated[editingIndex].id; // Atualizar o ID com o novo URL
         setVideos(updated);
         setEditingIndex(null);
         setEditingName("");
+        setEditingUrl(""); // Limpar o URL
       }
+      
       function cancelEdit() {
         setEditingIndex(null);
         setEditingName("");
+        setEditingUrl(""); // Limpar o URL
       }
 
       return (
@@ -288,6 +301,12 @@ hr {
                       value={editingName}
                       onChange={e => setEditingName(e.target.value)}
                     />
+                    <input
+                      className="edit-input"
+                      value={editingUrl}
+                      onChange={e => setEditingUrl(e.target.value)}
+                      placeholder="Novo link do YouTube"
+                    />
                     <div className="edit-buttons">
                       <button onClick={saveEdit}>✔</button>
                       <button onClick={cancelEdit}>✕</button>
@@ -300,7 +319,7 @@ hr {
                     </span>
                     <button
                       className="edit-btn"
-                      onClick={() => startEdit(i, vid.name)}
+                      onClick={() => startEdit(i, vid.name, `https://www.youtube.com/watch?v=${vid.id}`)} // Passar o URL atual
                     >✎</button>
                   </div>
                 )}
